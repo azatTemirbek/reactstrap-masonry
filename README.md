@@ -2,11 +2,11 @@
 
 Modified from codepen  'https://codepen.io/anon/pen/XPdEpM'
 
-##IMG
+# IMG
 
 ![alt text](https://raw.githubusercontent.com/e178551/reactstrap-masonry/master/src/demo.PNG)
 
-##Usage
+## Usage
 
 ```js
 export default class App extends Component {
