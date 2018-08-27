@@ -1,14 +1,14 @@
-## Masonry Reactstrap
+# Masonry Reactstrap
 
 Modified from codepen  'https://codepen.io/anon/pen/XPdEpM'
 
-# IMG
+## IMG
 
 ![alt text](https://raw.githubusercontent.com/e178551/reactstrap-masonry/master/src/demo.PNG)
 
 ## Usage
 
-```js
+```jsx
 export default class App extends Component {
     constructor(props) {
         super(props)
