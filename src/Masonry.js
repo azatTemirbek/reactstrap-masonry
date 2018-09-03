@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import './Masonry.css';
+import {Col, Card, Row} from 'reactstrap';
 
 /**
  * Modified from codepen  'https://codepen.io/anon/pen/XPdEpM' 
@@ -49,26 +50,18 @@ export class Masonry extends PureComponent {
             margin: 'auto',
             ...this.props.masonryStyle
         };
-        const columnStyle = {
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-            alignContent: 'stretch',
-            flexGrow: '1',
-            ...this.props.columnStyle
-        };
         return (
-            <div style={masonryStyle} ref="Masonry">
-                {this.mapChildren().map((col, ci) => {
-                    return (
-                        <div style={columnStyle} key={ci} >
-                            {col.map((child, i) => {
-                                return <React.Fragment key={i} >{child}</React.Fragment>
-                            })}
-                        </div>
-                    )
-                })}
-            </div>
+                <div style={masonryStyle} ref="Masonry">
+                    {this.mapChildren().map((col, ci) => {
+                        return (
+                            <Col className='pr-2 pl-2' style={this.props.columnStyle} key={ci} >
+                                {col.map((child, i) => {
+                                    return <Card key={i} className='mt-2 mb-2'>{child}</Card>
+                                })}
+                            </Col> 
+                        )
+                    })}
+                </div>
         )
     }
 }
