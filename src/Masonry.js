@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import './Masonry.css';
-import {Col, Card, Row} from 'reactstrap';
+import {Col, Card} from 'reactstrap';
 
 /**
  * Modified from codepen  'https://codepen.io/anon/pen/XPdEpM' 
