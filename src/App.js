@@ -3,9 +3,12 @@ import {
     CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button
 } from 'reactstrap';
-import {Masonry} from './Masonry';
+import { Masonry } from './Masonry';
 
 export default class App extends Component {
+    state = {
+        images: []
+    }
     constructor(props) {
         super(props)
         this.brakePoints = [350, 500, 750];
@@ -15,22 +18,34 @@ export default class App extends Component {
             const ih = 200 + Math.floor(Math.random() * 10) * 15;
             this.images.push("https://unsplash.it/250/" + ih + "?image=" + this.imgId[i]);
         }
+        this.setState({
+            images: this.images
+        })
     }
     render() {
         return (
-            <Masonry brakePoints={this.brakePoints}>
+            <Masonry brakePoints={this.brakePoints} loadNext={e => {
+                this.imgId = [123, 20, 55, 10, 89, 500, 16, 27, 16, 5, 78, 9];
+                for (let i = 0; i < this.imgId.length; i++) {
+                    const ih = 200 + Math.floor(Math.random() * 10) * 15;
+                    this.images.push("https://unsplash.it/250/" + ih + "?image=" + this.imgId[i]);
+                }
+                this.setState({
+                    images:this.images
+            })
+            }}>
                 {this.images.map((image, id) => {
                     return (
                         <div className="" key={id}>
-                          
-                                <CardImg top width="100%" src={image} alt="Card image cap" />
-                                <CardBody>
-                                    <CardTitle>Card title</CardTitle>
-                                    <CardSubtitle>Card subtitle</CardSubtitle>
-                                    <CardText>Some quick example text to build on the card title and make up the bulk of the card's content.</CardText>
-                                    <Button>Button</Button>
-                                </CardBody>
-                            
+
+                            <CardImg top width="100%" src={image} alt="Card image cap" />
+                            <CardBody>
+                                <CardTitle>Card title</CardTitle>
+                                <CardSubtitle>Card subtitle</CardSubtitle>
+                                <CardText>Some quick example text to build on the card title and make up the bulk of the card's content.</CardText>
+                                <Button>Button</Button>
+                            </CardBody>
+
                         </div>
                     )
                 })}
