@@ -24,15 +24,23 @@ export default class App extends Component {
     }
     render() {
         return (
-            <Masonry brakePoints={this.brakePoints} loadNext={e => {
-                this.imgId = [123, 20, 55, 10, 89, 500, 16, 27, 16, 5, 78, 9];
-                for (let i = 0; i < this.imgId.length; i++) {
+            <Masonry 
+            brakePoints={this.brakePoints} 
+            loadingComponent = {()=>{return '***********Loading***********'}}
+            loadNext={({columns,totalItems}) => {
+                // {columns,totalItems} use this to construct url 
+                for (let i = 0; i < 300; i++) {
                     const ih = 200 + Math.floor(Math.random() * 10) * 15;
-                    this.images.push("https://unsplash.it/250/" + ih + "?image=" + this.imgId[i]);
+                    this.images.push("https://unsplash.it/250/" + ih + "?image=" + (totalItems+i));
                 }
-                this.setState({
-                    images:this.images
-            })
+                let self = this
+                /**loading kind of effect */
+                setTimeout(()=>{
+                    self.setState({
+                        images: self.images
+                    })
+                },1000)
+                
             }}>
                 {this.images.map((image, id) => {
                     return (

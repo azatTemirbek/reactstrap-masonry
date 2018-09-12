@@ -6,68 +6,86 @@ import { Col, Card, Row } from 'reactstrap';
  * Modified from codepen  'https://codepen.io/anon/pen/XPdEpM' 
  * A component to render Masonry layout
  * @example
- * <XMasonry brakePoints={[350, 500, 750]} >{ this.state.photos.map((image, id) =>( <img key={id}  src={image}/> ) )} </XMasonry>
+ * <XMasonry loadingComponent = {()=>{return '***********Loading***********'}}
+ *           brakePoints={[350, 500, 750]}
+ *          loadNext={({columns,totalItems}) => {  {columns,totalItems} - use this to construct url}}
+ *  >{ this.state.photos.map((image, id) =>( <img key={id}  src={image}/> ) )} </XMasonry>
  */
 export class Masonry extends PureComponent {
-    
-    state = { 
+    state = {
         columns: 1,
-        prevY:0
+        prevY: 0,
+        loading: false
     };
-
-    constructor(props) {
-        super(props);
-
-        this.onResize = () => {
-            const columns = this.getColumns(this.refs.Masonry.offsetWidth);
-            if (columns !== this.state.columns) this.setState({ columns: columns });
+    constructor(props) { super(props) }
+    /**
+     * a funntion used to calculate columns when resized
+     */
+    onResize = () => {
+        const columns = this.getColumns(this.refs.Masonry.offsetWidth);
+        if (columns !== this.state.columns) this.setState({ columns: columns });
+    }
+    /**
+     * a function used to calculate columns from this.props.brakePoints
+     * @param {Number} width - width of the masonry component
+     */
+    getColumns = width => {
+        return this.props.brakePoints.reduceRight((p, c, i) => {
+            return c < width ? p : i;
+        }, this.props.brakePoints.length) + 1;
+    }
+    /**
+     * a function used to calculate children according to column size
+     */
+    mapChildren = () => {
+        let col = [];
+        const numC = this.state.columns;
+        for (let i = 0; i < numC; i++) {
+            col.push([]);
         }
-
-        this.getColumns = w => {
-            return this.props.brakePoints.reduceRight((p, c, i) => {
-                return c < w ? p : i;
-            }, this.props.brakePoints.length) + 1;
-        }
-
-        this.mapChildren = () => {
-            let col = [];
-            const numC = this.state.columns;
-            for (let i = 0; i < numC; i++) {
-                col.push([]);
-            }
-            return this.props.children.reduce((p, c, i) => {
-                p[i % numC].push(c);
-                return p;
-            }, col);
-        }
-        this.handleObserver = (entities, observer) => {
-            const y = entities[0].boundingClientRect.y;
-            if(this.state.prevY > y){
-                this.props.loadNext && this.props.loadNext();
-            }
-            this.setState({prevY:y},()=>{
-                console.log(entities[0].boundingClientRect.y);
-                
+        return this.props.children.reduce((p, c, i) => {
+            p[i % numC].push(c);
+            return p;
+        }, col);
+    }
+    /**
+     * a function used to call loadNext method to make lazyLoading from the rest
+     * @param {*} entities 
+     * @param {*} observer 
+     */
+    handleObserver = (entities, observer) => {
+        const y = entities[0].boundingClientRect.y;
+        if (this.state.prevY > y) {
+            this.props.loadNext && this.setState({ loading: true });
+            this.props.loadNext && this.props.loadNext({
+                columns: this.mapChildren().length,
+                totalItems: this.props.children.reduce((tot, ch) => tot + 1, 0)
             });
-
-
         }
+        this.setState({ prevY: y });
+    }
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.children.length < this.props.children.length && this.props.loadNext) { this.setState({ loading: false }) }
+        return true;
     }
     componentDidMount() {
+        //initial resize
         this.onResize();
         // add listener for window object
         window.addEventListener('resize', this.onResize);
-        // Create an observer
-        this.observer = new IntersectionObserver(
-            this.handleObserver.bind(this), //callback
-            {
-                root: null, // Page as root
-                rootMargin: "0px",
-                threshold: 0.01
-            }
-        );
-        //Observ the `loadingRef`
-        this.observer.observe(this.refs.loadingRef);
+        if (this.props.loadNext) {
+            // Create an observer
+            this.observer = new IntersectionObserver(
+                this.handleObserver.bind(this), //callback
+                {
+                    root: null, // Page as root
+                    rootMargin: "0px",
+                    threshold: 0.01
+                }
+            );
+            //Observ the `loadingRef`
+            this.observer.observe(this.refs.loadingRef);
+        }
     }
     render() {
         const masonryStyle = {
@@ -80,7 +98,7 @@ export class Masonry extends PureComponent {
             ...this.props.masonryStyle
         };
         return (
-            <Row style={{overflowY: 'auto',margin:'5px', height:this.props.height||'500px'}}>
+            <Row style={{ overflowY: 'auto', margin: '5px', height: this.props.height || '500px' }}>
                 <div style={masonryStyle} ref="Masonry">
                     {this.mapChildren().map((col, ci) => {
                         return (
@@ -92,8 +110,10 @@ export class Masonry extends PureComponent {
                         )
                     })}
                 </div >
-                <div ref="loadingRef" style={{ height: "10%", width:'100%', margin: "0px", background: 'red' }} >
-                    <span style={{ display: this.state.loading ? "block" : "none" }}>Loading...</span>
+                <div ref="loadingRef" style={{ height: "10%", width: '100%', margin: "0px", display: this.props.loadNext ? "block" : "none" }} >
+                    <span style={{ display: this.state.loading ? "block" : "none" }}>
+                        {(this.props.loadingComponent) ? this.props.loadingComponent() : 'Loading...'}
+                    </span>
                 </div>
             </Row>
         )
